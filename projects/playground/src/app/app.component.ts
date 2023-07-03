@@ -88,6 +88,12 @@ import {
       >
         La confirmation est obligatoire
       </p>
+      <p
+        class="invalid-feedback"
+        *ngIf="confirm.touched && confirm.hasError('confirmPassword')"
+      >
+        La confirmation n'est pas identique au mot de passe
+      </p>
       <button class="btn btn-success">Inscription</button>
     </form>
   </div>`,
@@ -142,6 +148,8 @@ const confirmPasswordValidator: ValidatorFn = (
   if (password?.value === confirm?.value) {
     return null;
   }
+
+  confirm?.setErrors({ confirmPassword: true });
 
   return { confirmPassword: true };
 };
