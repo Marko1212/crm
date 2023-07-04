@@ -7,16 +7,20 @@ import { BannedEmailDirective } from './banned-email.directive';
 import { UniqueEmailValidator } from './unique-email.validator';
 import { ConfirmPasswordValidator } from './confirm-password.validator';
 import { ColorPickerComponent } from './color-picker.component';
+import { ReactiveInscriptionComponent } from './reactive-inscription.component';
 import { AppComponent } from './app.component';
+import { ReactiveRecipeComponent } from './reactive-recipe.component';
 
 @NgModule({
   declarations: [
+    AppComponent,
     InscriptionComponent,
     BannedEmailDirective,
     UniqueEmailValidator,
     ConfirmPasswordValidator,
     ColorPickerComponent,
-    AppComponent,
+    ReactiveInscriptionComponent,
+    ReactiveRecipeComponent,
   ],
   imports: [BrowserModule, FormsModule, ReactiveFormsModule],
   providers: [],
