@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {
   AbstractControl,
   AsyncValidatorFn,
+  FormArray,
   FormControl,
   FormGroup,
   ValidatorFn,
@@ -14,6 +15,8 @@ import {
     <h1>Angular Avancé !</h1>
     <form [formGroup]="inscription" (submit)="onSubmit()">
       <input
+        required
+        email
         formControlName="email"
         [class.is-invalid]="email.touched && email.invalid"
         [class.is-valid]="email.touched && email.valid"
@@ -50,86 +53,148 @@ import {
       >
         L'adresse email est déjà utilisée
       </p>
-      <input
-        formControlName="password"
-        [class.is-invalid]="password.touched && password.invalid"
-        [class.is-valid]="password.touched && password.valid"
-        type="password"
-        name="password"
-        id="password"
-        class="form-control mb-2"
-        placeholder="Mot de passe"
-      />
-      <p
-        class="invalid-feedback"
-        *ngIf="password.touched && password.hasError('required')"
+      <div formGroupName="security">
+        <input
+          formControlName="password"
+          [class.is-invalid]="password.touched && password.invalid"
+          [class.is-valid]="password.touched && password.valid"
+          type="password"
+          name="password"
+          id="password"
+          class="form-control mb-2"
+          placeholder="Mot de passe"
+        />
+        <p
+          class="invalid-feedback"
+          *ngIf="password.touched && password.hasError('required')"
+        >
+          Le mot de passe est obligatoire
+        </p>
+        <p
+          class="invalid-feedback"
+          *ngIf="password.touched && password.hasError('minlength')"
+        >
+          Le mot de passe doit faire au moins 4 caractères
+        </p>
+        <input
+          formControlName="confirm"
+          [class.is-invalid]="confirm.touched && confirm.invalid"
+          [class.is-valid]="confirm.touched && confirm.valid"
+          type="password"
+          name="confirm"
+          id="confirm"
+          class="form-control mb-2"
+          placeholder="Confirmation du mot de passe"
+        />
+        <p
+          class="invalid-feedback"
+          *ngIf="confirm.touched && confirm.hasError('required')"
+        >
+          La confirmation est obligatoire
+        </p>
+        <p
+          class="invalid-feedback"
+          *ngIf="confirm.touched && confirm.hasError('confirmPassword')"
+        >
+          La confirmation n'est pas identique au mot de passe
+        </p>
+      </div>
+      <h3>
+        Quels sont vos langages favoris?
+        <button
+          (click)="addLanguage()"
+          class="btn btn-primary btn-sm"
+          type="button"
+        >
+          + Ajouter un langage
+        </button>
+      </h3>
+
+      <div class="alert bg-info" *ngIf="languages.controls.length === 0">
+        Vous n'avez pas ajouté de langage, cliquez sur le bouton ci-dessus
+      </div>
+      <div
+        class="row"
+        *ngFor="let group of languages.controls; let i = index"
+        [formGroup]="group"
       >
-        Le mot de passe est obligatoire
-      </p>
-      <p
-        class="invalid-feedback"
-        *ngIf="password.touched && password.hasError('minlength')"
-      >
-        Le mot de passe doit faire au moins 4 caractères
-      </p>
-      <input
-        formControlName="confirm"
-        [class.is-invalid]="confirm.touched && confirm.invalid"
-        [class.is-valid]="confirm.touched && confirm.valid"
-        type="password"
-        name="confirm"
-        id="confirm"
-        class="form-control mb-2"
-        placeholder="Confirmation du mot de passe"
-      />
-      <p
-        class="invalid-feedback"
-        *ngIf="confirm.touched && confirm.hasError('required')"
-      >
-        La confirmation est obligatoire
-      </p>
-      <p
-        class="invalid-feedback"
-        *ngIf="confirm.touched && confirm.hasError('confirmPassword')"
-      >
-        La confirmation n'est pas identique au mot de passe
-      </p>
+        <div class="col">
+          <input
+            type="text"
+            class="form-control mb-2"
+            placeholder="Nom du langage"
+            formControlName="name"
+          />
+        </div>
+        <div class="col">
+          <select formControlName="level" class="form-control">
+            <option value="debutant">Débutant(e)</option>
+            <option value="confirme">Confirmé(e)</option>
+          </select>
+        </div>
+        <div class="col-1">
+          <button
+            (click)="languages.removeAt(i)"
+            class="btn btn-sm btn-danger"
+            type="button"
+          >
+            X
+          </button>
+        </div>
+      </div>
+
       <button class="btn btn-success">Inscription</button>
     </form>
   </div>`,
 })
 export class AppComponent {
+  get languages() {
+    return this.inscription.controls.languages;
+  }
+
+  addLanguage() {
+    this.languages.push(
+      new FormGroup({
+        name: new FormControl(),
+        level: new FormControl('debutant'),
+      })
+    );
+  }
+
   get email() {
     return this.inscription.controls.email;
   }
 
   get password() {
-    return this.inscription.controls.password;
+    return this.security.controls.password;
   }
 
   get confirm() {
-    return this.inscription.controls.confirm;
+    return this.security.controls.confirm;
   }
 
-  inscription = new FormGroup(
-    {
-      email: new FormControl(
-        '',
-        [
+  get security() {
+    return this.inscription.controls.security;
+  }
+
+  inscription = new FormGroup({
+    languages: new FormArray<FormGroup>([]),
+    email: new FormControl(
+      '',
+      [createBannedEmailValidator('test@test.fr')],
+      [uniqueEmailValidator]
+    ),
+    security: new FormGroup(
+      {
+        password: new FormControl('', [
           Validators.required,
-          Validators.email,
-          createBannedEmailValidator('test@test.fr'),
-        ],
-        [uniqueEmailValidator]
-      ),
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(4),
-      ]),
-      confirm: new FormControl('', [Validators.required]),
-    },
-    { validators: [confirmPasswordValidator] }
-  );
+          Validators.minLength(4),
+        ]),
+        confirm: new FormControl('', [Validators.required]),
+      },
+      { validators: [confirmPasswordValidator] }
+    ),
+  });
 
   onSubmit() {
     console.log(this.inscription.value);
