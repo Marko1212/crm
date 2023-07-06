@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ApiPopularResponse } from './types';
+import { MoviesService } from './movies.service';
 
 @Component({
   selector: 'app-movies',
@@ -22,16 +23,14 @@ import { ApiPopularResponse } from './types';
 export class MoviesComponent implements OnInit {
   movies: any[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private service: MoviesService) {}
 
   ngOnInit(): void {
     /*     const request = fetch(
       'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
     ); */
 
-    const request = this.http.get<ApiPopularResponse>(
-      'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
-    );
+    const request = this.service.getPopularMovies();
 
     request.subscribe((response) => {
       this.movies = response.results.map((item) => {

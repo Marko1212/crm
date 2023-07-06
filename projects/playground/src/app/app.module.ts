@@ -12,6 +12,7 @@ import { AppComponent } from './app.component';
 import { ReactiveRecipeComponent } from './reactive-recipe.component';
 import { MoviesComponent } from './movies/movies.component';
 import { HttpClientModule } from '@angular/common/http';
+import { MoviesService } from './movies/movies.service';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,7 @@ import { HttpClientModule } from '@angular/common/http';
     MoviesComponent,
   ],
   imports: [BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
-  providers: [],
+  providers: [MoviesService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
