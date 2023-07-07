@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { ApiPopularResponse } from './types';
+import { ApiPopularResponse, Movie, Movies } from './types';
 import { MoviesService } from './movies.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-movies',
@@ -21,7 +22,7 @@ import { MoviesService } from './movies.service';
   styles: [],
 })
 export class MoviesComponent implements OnInit {
-  movies: any[] = [];
+  movies: Movies = [];
 
   constructor(private service: MoviesService) {}
 
@@ -29,21 +30,9 @@ export class MoviesComponent implements OnInit {
     /*     const request = fetch(
       'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
     ); */
-
-    const request = this.service.getPopularMovies();
-
-    request.subscribe((response) => {
-      this.movies = response.results.map((item) => {
-        return {
-          id: item.id,
-          title: item.title,
-          description: item.overview,
-          rating: item.vote_average,
-          image: 'https://image.tmdb.org/t/p/w500/' + item.poster_path,
-        };
-      });
-    });
-
+    this.service
+      .getPopularMovies()
+      .subscribe((movies) => (this.movies = movies));
     /*     request
       .then((response) => response.json())
       .then((result: any) => {
