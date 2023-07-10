@@ -1,4 +1,9 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { MoviesComponent } from './movies.component';
 import {
   HttpClientTestingModule,
@@ -41,6 +46,9 @@ describe('MoviesComponent avec Spectator', () => {
     //  const service = spectator.inject(MoviesService);
 
     // const spy = spyOn(service, 'getPopularMovies');
+
+    spectator.inject(MoviesService).getGenres.and.returnValue(of([]));
+
     spectator
       .inject(MoviesService)
       .getPopularMovies.and.returnValue(of(MOCK_MOVIES));
@@ -52,17 +60,10 @@ describe('MoviesComponent avec Spectator', () => {
 });
 
 describe('MoviesComponent avec TestBed', () => {
-  it('should show movies', async () => {
-    /* const fetchSpy = spyOn(window, 'fetch');
-    fetchSpy.and.returnValue(
-      Promise.resolve({
-        json() {
-          return Promise.resolve({
-            results: [{ title: 'Movie 1' }, { title: 'Movie 2' }],
-          });
-        },
-      } as Response)
-    ); */
+  let fixture: ComponentFixture<MoviesComponent>;
+  let component: MoviesComponent;
+
+  beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [MoviesComponent],
       imports: [HttpClientTestingModule],
@@ -76,9 +77,42 @@ describe('MoviesComponent avec TestBed', () => {
     const spy = spyOn(service, 'getPopularMovies');
     spy.and.returnValue(of(MOCK_MOVIES));
 
+    const genreSpy = spyOn(service, 'getGenres');
+    genreSpy.and.returnValue(of([]));
+
     // Notre test
-    const fixture = TestBed.createComponent(MoviesComponent);
+    fixture = TestBed.createComponent(MoviesComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('should load more movies if we are at the bottom of the page', async () => {
+    component.isBottomOfThePage = () => true;
+
+    window.dispatchEvent(new Event('scroll'));
+
+    expect(component.movies.length).toBe(4);
+  });
+
+  it('should not load more movies if we are not at the bottom of the page', async () => {
+    component.isBottomOfThePage = () => false;
+
+    window.dispatchEvent(new Event('scroll'));
+
+    expect(component.movies.length).toBe(2);
+  });
+
+  it('should show movies', async () => {
+    /* const fetchSpy = spyOn(window, 'fetch');
+    fetchSpy.and.returnValue(
+      Promise.resolve({
+        json() {
+          return Promise.resolve({
+            results: [{ title: 'Movie 1' }, { title: 'Movie 2' }],
+          });
+        },
+      } as Response)
+    ); */
     /* 
     const request = httpController.expectOne(
       'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
@@ -94,8 +128,6 @@ describe('MoviesComponent avec TestBed', () => {
         },
       ],
     }); */
-
-    fixture.detectChanges();
 
     /*  expect(fetchSpy).toHaveBeenCalledWith(
       'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'

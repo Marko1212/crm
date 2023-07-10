@@ -11,8 +11,9 @@ import { ReactiveInscriptionComponent } from './reactive-inscription.component';
 import { AppComponent } from './app.component';
 import { ReactiveRecipeComponent } from './reactive-recipe.component';
 import { MoviesComponent } from './movies/movies.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MoviesService } from './movies/movies.service';
+import { MoviesKeyInterceptor } from './movies/movies-key.interceptor';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,10 @@ import { MoviesService } from './movies/movies.service';
     MoviesComponent,
   ],
   imports: [BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
-  providers: [MoviesService],
+  providers: [
+    MoviesService,
+    { provide: HTTP_INTERCEPTORS, useClass: MoviesKeyInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

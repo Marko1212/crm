@@ -1,15 +1,15 @@
 import { HttpClient } from '@angular/common/http';
-import { ApiPopularResponse, Movie } from './types';
+import { ApiGenresResponse, ApiPopularResponse, Movie } from './types';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs';
 
 @Injectable()
 export class MoviesService {
   constructor(private http: HttpClient) {}
-  getPopularMovies() {
+  getPopularMovies(page = 1) {
     return this.http
       .get<ApiPopularResponse>(
-        'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
+        'https://api.themoviedb.org/3/movie/popular?page=' + page
       )
       .pipe(
         map((response) => {
@@ -24,5 +24,11 @@ export class MoviesService {
           });
         })
       );
+  }
+
+  getGenres() {
+    return this.http
+      .get<ApiGenresResponse>('https://api.themoviedb.org/3/genre/movie/list')
+      .pipe(map((apiResponse) => apiResponse.genres));
   }
 }

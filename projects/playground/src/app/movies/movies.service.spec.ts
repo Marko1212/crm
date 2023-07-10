@@ -4,14 +4,28 @@ import {
 } from '@angular/common/http/testing';
 import { MoviesService } from './movies.service';
 import { TestBed } from '@angular/core/testing';
-import { HttpClient } from '@angular/common/http';
-import { ApiMovie } from './types';
+import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
+import { ApiGenresResponse, ApiMovie } from './types';
 import {
   SpectatorHttp,
   SpectatorService,
   createHttpFactory,
   createServiceFactory,
 } from '@ngneat/spectator';
+import { MoviesKeyInterceptor } from './movies-key.interceptor';
+
+const MOCK_GENRES_RESPONSE: ApiGenresResponse = {
+  genres: [
+    {
+      id: 1,
+      name: 'Action',
+    },
+    {
+      id: 2,
+      name: 'Aventure',
+    },
+  ],
+};
 
 const MOCK_POPULAR_RESPONSE = {
   results: [
@@ -29,9 +43,47 @@ const MOCK_POPULAR_RESPONSE = {
 };
 
 describe('MoviesService avec TestBed', () => {
+  it('should get and transform genres', (done: DoneFn) => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        {
+          provide: HTTP_INTERCEPTORS,
+          useClass: MoviesKeyInterceptor,
+          multi: true,
+        },
+      ],
+    });
+
+    const http = TestBed.inject(HttpClient);
+    const httpController = TestBed.inject(HttpTestingController);
+
+    const service = new MoviesService(http);
+
+    service.getGenres().subscribe((genres) => {
+      expect(genres.length).toBe(2);
+      expect(genres[0].id).toBe(1);
+      expect(genres[0].name).toBe('Action');
+      done();
+    });
+
+    const request = httpController.expectOne(
+      'https://api.themoviedb.org/3/genre/movie/list?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR'
+    );
+
+    request.flush(MOCK_GENRES_RESPONSE);
+  });
+
   it('should get transformed popular movies', (done: DoneFn) => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
+      providers: [
+        {
+          provide: HTTP_INTERCEPTORS,
+          useClass: MoviesKeyInterceptor,
+          multi: true,
+        },
+      ],
     });
 
     const http = TestBed.inject(HttpClient);
@@ -47,7 +99,7 @@ describe('MoviesService avec TestBed', () => {
     });
 
     const request = httpController.expectOne(
-      'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
+      'https://api.themoviedb.org/3/movie/popular?page=1&api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR'
     );
 
     request.flush(MOCK_POPULAR_RESPONSE);
@@ -59,6 +111,13 @@ describe('MoviesService avec Spectator', () => {
 
   const createService = createHttpFactory({
     service: MoviesService,
+    providers: [
+      {
+        provide: HTTP_INTERCEPTORS,
+        useClass: MoviesKeyInterceptor,
+        multi: true,
+      },
+    ],
   });
 
   it('should get transformed popular movies', (done: DoneFn) => {
@@ -75,9 +134,26 @@ describe('MoviesService avec Spectator', () => {
     });
 
     const request = spectator.controller.expectOne(
-      'https://api.themoviedb.org/3/movie/popular?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR&page=1'
+      'https://api.themoviedb.org/3/movie/popular?page=1&api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR'
     );
 
     request.flush(MOCK_POPULAR_RESPONSE);
+  });
+
+  it('should get and transform genres', (done: DoneFn) => {
+    spectator = createService();
+
+    spectator.service.getGenres().subscribe((genres) => {
+      expect(genres.length).toBe(2);
+      expect(genres[0].id).toBe(1);
+      expect(genres[0].name).toBe('Action');
+      done();
+    });
+
+    const request = spectator.controller.expectOne(
+      'https://api.themoviedb.org/3/genre/movie/list?api_key=71f035c93479d9a4a3d2ab8354f783d0&language=fr-FR'
+    );
+
+    request.flush(MOCK_GENRES_RESPONSE);
   });
 });
