@@ -39,13 +39,10 @@ describe('MoviesComponent avec Spectator', () => {
     mocks: [MoviesService],
   });
 
-  it('should show movies', () => {
+  beforeEach(() => {
     spectator = createSpectator({
       detectChanges: false,
     });
-    //  const service = spectator.inject(MoviesService);
-
-    // const spy = spyOn(service, 'getPopularMovies');
 
     spectator.inject(MoviesService).getGenres.and.returnValue(of([]));
 
@@ -54,8 +51,26 @@ describe('MoviesComponent avec Spectator', () => {
       .getPopularMovies.and.returnValue(of(MOCK_MOVIES));
 
     spectator.detectChanges();
+  });
 
+  it('should show movies', () => {
     expect(spectator.queryAll('.movie')).toHaveLength(2);
+  });
+
+  it('should load more movies if we are at the bottom of the page', () => {
+    spectator.component.isBottomOfThePage = () => true;
+
+    window.dispatchEvent(new Event('scroll'));
+
+    expect(spectator.component.movies).toHaveLength(4);
+  });
+
+  it('should not load more movies if we scroll but we are not at the bottom of the page', () => {
+    spectator.component.isBottomOfThePage = () => false;
+
+    window.dispatchEvent(new Event('scroll'));
+
+    expect(spectator.component.movies).toHaveLength(2);
   });
 });
 

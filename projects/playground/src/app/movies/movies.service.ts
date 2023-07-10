@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { ApiGenresResponse, ApiPopularResponse, Movie } from './types';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs';
+import { delay, map } from 'rxjs';
 
 @Injectable()
 export class MoviesService {
@@ -29,6 +29,9 @@ export class MoviesService {
   getGenres() {
     return this.http
       .get<ApiGenresResponse>('https://api.themoviedb.org/3/genre/movie/list')
-      .pipe(map((apiResponse) => apiResponse.genres));
+      .pipe(
+        map((apiResponse) => apiResponse.genres),
+        delay(4000)
+      );
   }
 }

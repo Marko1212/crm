@@ -14,6 +14,7 @@ import { MoviesComponent } from './movies/movies.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { MoviesService } from './movies/movies.service';
 import { MoviesKeyInterceptor } from './movies/movies-key.interceptor';
+import { IntervalComponent } from './interval.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { MoviesKeyInterceptor } from './movies/movies-key.interceptor';
     ReactiveInscriptionComponent,
     ReactiveRecipeComponent,
     MoviesComponent,
+    IntervalComponent,
   ],
   imports: [BrowserModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   providers: [
