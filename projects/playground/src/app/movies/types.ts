@@ -4,6 +4,7 @@ export type Movie = {
   description: string;
   image: string;
   rating: number;
+  genres: number[];
 };
 
 export type Movies = Movie[];

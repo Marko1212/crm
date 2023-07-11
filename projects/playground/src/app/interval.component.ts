@@ -1,15 +1,23 @@
 import { Component } from '@angular/core';
-import { Subscription, interval } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  Subscription,
+  interval,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { MoviesService } from './movies/movies.service';
 
 @Component({
   selector: 'app-interval',
-  template: ` Interval {{ counter }} `,
+  template: ` Interval {{ counter$ | async }} `,
   styles: [],
 })
 export class IntervalComponent {
-  counter = 0;
-  souscription?: Subscription;
+  counter$?: Observable<number>;
+  //  destroy$ = new Subject();
+  //  souscription?: Subscription;
   // intervalId?: number;
 
   constructor() {}
@@ -18,10 +26,12 @@ export class IntervalComponent {
     /*     this.souscription = interval(1000).subscribe(() => {
       this.counter++;
       console.log(this.counter); */
-    this.souscription = interval(1000).subscribe(() => {
-      this.counter++;
-      console.log(this.counter);
-    });
+    this.counter$ = interval(1000).pipe(tap((value) => console.log(value)));
+    //    .pipe(takeUntil(this.destroy$))
+    /*       .subscribe(() => {
+        this.counter++;
+        console.log(this.counter);
+      }); */
 
     /*     this.intervalId = window.setInterval(() => {
       this.counter++;
@@ -30,7 +40,8 @@ export class IntervalComponent {
   }
 
   ngOnDestroy() {
-    this.souscription?.unsubscribe();
+    //   this.destroy$.next(null);
+    //  this.souscription?.unsubscribe();
     /*     if (this.intervalId) {
       window.clearInterval(this.intervalId);
     } */

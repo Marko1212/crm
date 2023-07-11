@@ -20,6 +20,7 @@ export class MoviesService {
               description: item.overview,
               rating: item.vote_average,
               image: 'https://image.tmdb.org/t/p/w500/' + item.poster_path,
+              genres: item.genre_ids,
             } as Movie;
           });
         })
@@ -29,9 +30,6 @@ export class MoviesService {
   getGenres() {
     return this.http
       .get<ApiGenresResponse>('https://api.themoviedb.org/3/genre/movie/list')
-      .pipe(
-        map((apiResponse) => apiResponse.genres),
-        delay(4000)
-      );
+      .pipe(map((apiResponse) => apiResponse.genres));
   }
 }

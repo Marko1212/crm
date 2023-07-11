@@ -4,12 +4,14 @@ import { ApiPopularResponse, Genres, Movie, Movies } from './types';
 import { MoviesService } from './movies.service';
 import {
   Observable,
+  Subscription,
   combineLatest,
   distinctUntilChanged,
   filter,
   forkJoin,
   fromEvent,
   map,
+  merge,
   switchMap,
   tap,
 } from 'rxjs';
@@ -17,18 +19,23 @@ import {
 @Component({
   selector: 'app-movies',
   template: `
-    <div class="mb-5">
-      <span class="badge bg-light" *ngFor="let genre of genres">
-        {{ genre.name }}
-      </span>
-    </div>
-    <div class="row movies">
-      <div class="movie col-4 mb-2" *ngFor="let movie of movies">
-        <div class="card">
-          <img src="{{ movie.image }}" alt="" class="card-image-top" />
-          <div class="card-body">
-            <h5 class="card-title">{{ movie.title }}</h5>
-            <p class="card-text">{{ movie.description }}</p>
+    <div *ngIf="genresAndMovies$ | async as data">
+      <div class="mb-5">
+        <span class="badge bg-light" *ngFor="let genre of data.genres">
+          {{ genre.name }}
+        </span>
+      </div>
+      <div class="row movies">
+        <div class="movie col-4 mb-2" *ngFor="let movie of data.movies">
+          <div class="card">
+            <img src="{{ movie.image }}" alt="" class="card-image-top" />
+            <div class="card-body">
+              <h5 class="card-title">{{ movie.title }}</h5>
+              <p class="card-text">{{ movie.description }}</p>
+              <span class="badge bg-light" *ngFor="let id of movie.genres"
+                >{{ getGenreLabel(id) }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -39,32 +46,52 @@ import {
 export class MoviesComponent implements OnInit {
   movies: Movies = [];
   genres: Genres = [];
+
+  genresAndMovies$?: Observable<{ genres: Genres; movies: Movies }>;
+
+  /*   genres$?: Observable<Genres>;
+  movies$?: Observable<Movies>; */
+
   page = 1;
+
+  getGenreLabel(id: number) {
+    return this.genres.find((genre) => genre.id === id)?.name;
+  }
+
+  //  subscriptions: Subscription[] = [];
+
+  /*   scrollSubscription?: Subscription;
+  initSubscription?: Subscription; */
 
   constructor(private service: MoviesService) {}
 
   ngOnInit(): void {
-    combineLatest([
+    const scroll$ = fromEvent(window, 'scroll').pipe(
+      map(() => this.isBottomOfThePage()),
+      distinctUntilChanged(),
+      filter((isBottom) => isBottom === true),
+      tap(() => this.page++),
+      switchMap(() => this.service.getPopularMovies(this.page))
+    );
+
+    /*     this.genres$ = this.service
+      .getGenres()
+      .pipe(tap((genres) => (this.genres = genres)));
+    this.movies$ = this.service.getPopularMovies(); */
+    this.genresAndMovies$ = combineLatest([
       this.service.getGenres(),
-      this.service.getPopularMovies(this.page),
-    ]).subscribe(([genres, movies]) => {
-      this.genres = genres;
-      this.movies = movies;
-    });
-
-    const scroll$ = fromEvent(window, 'scroll');
-
-    scroll$
-      .pipe(
-        map(() => this.isBottomOfThePage()),
-        distinctUntilChanged(),
-        filter((isBottom) => isBottom === true),
-        tap(() => this.page++),
-        switchMap(() => this.service.getPopularMovies(this.page))
-      )
-      .subscribe((movies) => {
+      merge(this.service.getPopularMovies(this.page), scroll$),
+    ]).pipe(
+      tap(([genres, movies]) => {
+        this.genres = genres;
         this.movies = [...this.movies, ...movies];
-      });
+      }),
+      map(([genres, movies]) => {
+        return { genres, movies: this.movies };
+      })
+    );
+
+    // this.subscriptions.push(initSub, scrollSub);
 
     /*     window.addEventListener('scroll', () => {
       const isBottom =
@@ -112,5 +139,11 @@ export class MoviesComponent implements OnInit {
         document.documentElement.clientHeight >=
       document.documentElement.scrollHeight - 300;
     return isBottom;
+  }
+
+  ngOnDestroy() {
+    /*     this.initSubscription?.unsubscribe();
+    this.scrollSubscription?.unsubscribe(); */
+    //  this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }
