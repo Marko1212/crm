@@ -8,6 +8,31 @@ import { EmailsComponent } from './email/emails.component';
 import { EmailsListComponent } from './email/emails-list.component';
 import { EmailDetailsComponent } from './email/email-details.component';
 import { EmailCreationComponent } from './email/email-creation.component';
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [
+  {
+    path: 'account/login',
+    component: LoginComponent,
+  },
+  {
+    path: 'account/register',
+    component: RegisterComponent,
+  },
+  {
+    path: 'emails',
+    component: EmailsComponent,
+    children: [
+      {
+        path: '',
+        component: EmailsListComponent,
+      },
+      { path: 'create', component: EmailCreationComponent },
+      { path: ':type', component: EmailsListComponent },
+      { path: 'read/:id', component: EmailDetailsComponent },
+    ],
+  },
+];
 
 @NgModule({
   declarations: [
@@ -17,12 +42,10 @@ import { EmailCreationComponent } from './email/email-creation.component';
     EmailsComponent,
     EmailsListComponent,
     EmailDetailsComponent,
-    EmailCreationComponent
+    EmailCreationComponent,
   ],
-  imports: [
-    BrowserModule
-  ],
+  imports: [BrowserModule, RouterModule.forRoot(routes)],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
