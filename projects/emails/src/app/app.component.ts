@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { AuthService } from './user/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -43,6 +45,11 @@ import { Component } from '@angular/core';
                 >Inscription</a
               >
             </li>
+            <li class="nav-item">
+              <button class="btn btn-sm btn-danger" (click)="onLogout()">
+                Déconnexion
+              </button>
+            </li>
           </ul>
         </div>
       </div>
@@ -52,4 +59,10 @@ import { Component } from '@angular/core';
     </div>`,
   styles: [],
 })
-export class AppComponent {}
+export class AppComponent {
+  constructor(private auth: AuthService, private router: Router) {}
+  onLogout() {
+    this.auth.logout();
+    this.router.navigateByUrl('/account/login');
+  }
+}

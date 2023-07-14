@@ -44,6 +44,7 @@ export class EmailsListComponent {
   title = 'Boîte de réception'; */
 
   emailsAndTitle$?: Observable<{ emails: Email[]; title: string }>;
+  type?: string | null;
 
   constructor(private route: ActivatedRoute, private router: Router) {}
 
@@ -56,6 +57,7 @@ export class EmailsListComponent {
     this.emailsAndTitle$ = this.route.paramMap.pipe(
       map((paramMap) => paramMap.get('type')),
       map((type) => {
+        this.type = type;
         if (!type) {
           return {
             emails: (FAKE_EMAILS_DATA as Email[]).filter(
@@ -100,6 +102,13 @@ export class EmailsListComponent {
   }
 
   goToEmail(id: number) {
-    this.router.navigateByUrl('/emails/read/' + id);
+    //   this.router.navigateByUrl('/emails/read/' + id);
+    if (!this.type) {
+      this.router.navigate(['./', 'read', id], { relativeTo: this.route });
+      return;
+    }
+
+    this.router.navigate(['../', 'read', id], { relativeTo: this.route });
+    return;
   }
 }
