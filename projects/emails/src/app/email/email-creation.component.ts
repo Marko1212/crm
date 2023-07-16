@@ -1,13 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-email-creation',
   template: `
     <h1>Nouveau message</h1>
 
-    <form>
+    <form #form="ngForm">
       <div class="form-group mb-2">
-        <input type="email" placeholder="Adresse email" class="form-control" />
+        <input
+          type="email"
+          ngModel
+          name="email"
+          placeholder="Adresse email"
+          class="form-control"
+        />
       </div>
       <div class="form-group mb-2">
         <input
@@ -27,4 +34,14 @@ import { Component } from '@angular/core';
   `,
   styles: [],
 })
-export class EmailCreationComponent {}
+export class EmailCreationComponent {
+  @ViewChild('form', { read: NgForm }) form?: NgForm;
+
+  isFormTouched() {
+    if (!this.form) {
+      return false;
+    }
+
+    return this.form?.touched;
+  }
+}

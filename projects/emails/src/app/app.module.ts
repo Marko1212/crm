@@ -18,6 +18,11 @@ const routes: Routes = [
       import('./email/email.module').then((file) => file.EmailModule),
     canActivate: [AuthGuard],
   },
+  {
+    path: '',
+    redirectTo: '/emails',
+    pathMatch: 'full',
+  },
 ];
 
 @NgModule({

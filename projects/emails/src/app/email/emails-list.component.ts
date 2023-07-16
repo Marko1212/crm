@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FAKE_EMAILS_DATA } from '../data';
 import { Email } from './types';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, map } from 'rxjs';
+import { Observable, delay, map } from 'rxjs';
 
 @Component({
   selector: 'app-emails-list',
@@ -49,12 +49,22 @@ export class EmailsListComponent {
   constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit(): void {
+    //  console.log(this.route.snapshot);
     /*     const type = this.route.snapshot.paramMap.get('type');
     this.emails = (FAKE_EMAILS_DATA as Email[]).filter(
       (email) => email.status === type?.toUpperCase()
     ); */
+    this.emailsAndTitle$ = this.route.data.pipe(
+      map((data) => {
+        return {
+          emails: data['emails'] as Email[],
+          title: data['title'],
+        };
+      })
+    );
 
-    this.emailsAndTitle$ = this.route.paramMap.pipe(
+    /*     this.emailsAndTitle$ = this.route.paramMap.pipe(
+      delay(1000),
       map((paramMap) => paramMap.get('type')),
       map((type) => {
         this.type = type;
@@ -74,7 +84,7 @@ export class EmailsListComponent {
           title: type === 'sent' ? 'Emails envoyés' : 'Corbeille',
         };
       })
-    );
+    ); */
 
     /*     this.route.paramMap.subscribe((paramMap) => {
       const type = paramMap.get('type');

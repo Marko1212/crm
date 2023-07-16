@@ -1,6 +1,12 @@
 import { Component } from '@angular/core';
 import { AuthService } from './user/auth.service';
-import { Router } from '@angular/router';
+import {
+  ActivationStart,
+  GuardsCheckEnd,
+  NavigationEnd,
+  Router,
+} from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +28,7 @@ import { Router } from '@angular/router';
         </button>
         <div class="collapse navbar-collapse" id="navbarColor01">
           <ul class="navbar-nav me-auto">
-            <li class="nav-item">
+            <li class="nav-item" *ngIf="isAuthenticated$ | async">
               <a class="nav-link" routerLinkActive="active" routerLink="/emails"
                 >Mes messages
               </a>
@@ -60,7 +66,32 @@ import { Router } from '@angular/router';
   styles: [],
 })
 export class AppComponent {
+  isAuthenticated$?: Observable<boolean>;
   constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit() {
+    this.router.events.subscribe((event) => {
+      if (event instanceof ActivationStart) {
+        console.log('30%');
+      }
+
+      if (event instanceof GuardsCheckEnd) {
+        console.log('50%');
+      }
+
+      if (event instanceof NavigationEnd) {
+        console.log('90%');
+      }
+    });
+
+    /*     this.isAuthenticated = this.auth.authStatus;
+
+    this.auth.authStatus$.subscribe((authStatus) => {
+      this.isAuthenticated = authStatus;
+    }); */
+    this.isAuthenticated$ = this.auth.authStatus$;
+  }
+
   onLogout() {
     this.auth.logout();
     this.router.navigateByUrl('/account/login');
