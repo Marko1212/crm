@@ -60,6 +60,7 @@ import { Observable } from 'rxjs';
         </div>
       </div>
     </nav>
+    <app-loading-bar></app-loading-bar>
     <div class="container pt-5">
       <router-outlet></router-outlet>
     </div>`,
@@ -70,20 +71,6 @@ export class AppComponent {
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.router.events.subscribe((event) => {
-      if (event instanceof ActivationStart) {
-        console.log('30%');
-      }
-
-      if (event instanceof GuardsCheckEnd) {
-        console.log('50%');
-      }
-
-      if (event instanceof NavigationEnd) {
-        console.log('90%');
-      }
-    });
-
     /*     this.isAuthenticated = this.auth.authStatus;
 
     this.auth.authStatus$.subscribe((authStatus) => {

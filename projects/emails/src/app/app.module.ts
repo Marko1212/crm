@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './user/auth.service';
+import { LoadingBarComponent } from './loading-bar.component';
 
 const routes: Routes = [
   {
@@ -26,7 +27,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, LoadingBarComponent],
   imports: [BrowserModule, RouterModule.forRoot(routes)],
   providers: [AuthGuard, AuthService],
   bootstrap: [AppComponent],
