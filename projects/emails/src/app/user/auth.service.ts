@@ -2,7 +2,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 export class AuthService {
   // authStatus = false;
-  authStatus$ = new BehaviorSubject<boolean>(true);
+  authStatus$ = new BehaviorSubject<boolean>(false);
 
   login() {
     console.log('On se connecte');
