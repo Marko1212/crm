@@ -1,4 +1,3 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import {
   AbstractControl,
@@ -7,7 +6,9 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { map } from 'rxjs';
+import { AuthService, RegisterData } from '../auth.service';
 
 @Component({
   selector: 'app-register',
@@ -18,6 +19,9 @@ import { map } from 'rxjs';
         Vous pourrez alors gérer facilement vos factures en tant que Freelance !
       </p>
       <form [formGroup]="registerForm" (submit)="onSubmit()">
+        <div class="alert bg-warning" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
         <div>
           <label class="mb-1" for="name">Nom d'utilisateur</label>
           <input
@@ -95,7 +99,13 @@ import { map } from 'rxjs';
           >
             La confirmation de mot de passe est obligatoire
           </p>
-          <p class="invalid-feedback" *ngIf="registerForm.hasError('confirm') && !confirmPassword.hasError('required')">
+          <p
+            class="invalid-feedback"
+            *ngIf="
+              registerForm.hasError('confirm') &&
+              !confirmPassword.hasError('required')
+            "
+          >
             La confirmation ne correspond pas au mot de passe
           </p>
         </div>
@@ -106,24 +116,32 @@ import { map } from 'rxjs';
   styles: [],
 })
 export class RegisterComponent {
-  constructor(private http: HttpClient) {}
+  errorMessage = '';
+  constructor(private router: Router, private auth: AuthService) {}
 
   uniqueEmailAsyncValidator(control: AbstractControl) {
-    return this.http
-      .post<{ exists: boolean }>(
-        'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/user/validation/exists',
-        {
-          email: control.value,
-        }
-      )
-      .pipe(
-        map((apiResponse) => apiResponse.exists),
-        map((exists) => (exists ? { uniqueEmail: true } : null))
-      );
+    return this.auth
+      .exists(control.value)
+      .pipe(map((exists) => (exists ? { uniqueEmail: true } : null)));
   }
 
   onSubmit() {
-    console.log(this.registerForm.value);
+    if (this.registerForm.invalid) {
+      return;
+    }
+
+    const data: RegisterData = {
+      email: this.email.value!,
+      name: this.name.value!,
+      password: this.password.value!,
+    };
+
+    this.auth.register(data).subscribe({
+      next: () => this.router.navigateByUrl('/'),
+      error: (error) =>
+        (this.errorMessage =
+          'Un problème est survenu, merci de réessayer plus tard ou de contacter un(e) responsable'),
+    });
   }
 
   registerForm = new FormGroup(
