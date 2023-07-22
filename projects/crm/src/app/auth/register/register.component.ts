@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import {
   AbstractControl,
+  FormBuilder,
   FormControl,
   FormGroup,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map } from 'rxjs';
+import { Subject, map, takeUntil } from 'rxjs';
 import { AuthService, RegisterData } from '../auth.service';
 
 @Component({
@@ -116,8 +117,13 @@ import { AuthService, RegisterData } from '../auth.service';
   styles: [],
 })
 export class RegisterComponent {
+  private readonly unsubscribe$: Subject<void> = new Subject();
   errorMessage = '';
-  constructor(private router: Router, private auth: AuthService) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+    private fb: FormBuilder
+  ) {}
 
   uniqueEmailAsyncValidator(control: AbstractControl) {
     return this.auth
@@ -136,28 +142,34 @@ export class RegisterComponent {
       password: this.password.value!,
     };
 
-    this.auth.register(data).subscribe({
-      next: () => this.router.navigateByUrl('/'),
-      error: (error) =>
-        (this.errorMessage =
-          'Un problème est survenu, merci de réessayer plus tard ou de contacter un(e) responsable'),
-    });
+    this.auth
+      .register(data)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe({
+        next: () => this.router.navigateByUrl('/'),
+        error: (error) =>
+          (this.errorMessage =
+            'Un problème est survenu, merci de réessayer plus tard ou de contacter un(e) responsable'),
+      });
   }
 
-  registerForm = new FormGroup(
+  registerForm = this.fb.group(
     {
-      email: new FormControl(
+      email: [
         '',
         [Validators.required, Validators.email],
-        [this.uniqueEmailAsyncValidator.bind(this)]
-      ),
-      name: new FormControl('', [Validators.required, Validators.minLength(5)]),
-      password: new FormControl('', [
-        Validators.required,
-        Validators.minLength(5),
-        Validators.pattern(/\d+/),
-      ]),
-      confirmPassword: new FormControl('', Validators.required),
+        [this.uniqueEmailAsyncValidator.bind(this)],
+      ],
+      name: ['', [Validators.required, Validators.minLength(5)]],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(5),
+          Validators.pattern(/\d+/),
+        ],
+      ],
+      confirmPassword: ['', Validators.required],
     },
     {
       validators: confirmPasswordValidator,
@@ -178,6 +190,11 @@ export class RegisterComponent {
 
   get confirmPassword() {
     return this.registerForm.controls.confirmPassword;
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 }
 

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs';
+import { BehaviorSubject, map, tap } from 'rxjs';
 
 export type RegisterData = {
   email: string;
@@ -8,8 +8,18 @@ export type RegisterData = {
   password: string;
 };
 
+export type LoginData = {
+  email: string;
+  password: string;
+};
+
+export type LoginApiResponse = { authToken: string };
+
 @Injectable()
 export class AuthService {
+  authStatus$ = new BehaviorSubject(false);
+  authToken: string | null = null;
+
   constructor(private http: HttpClient) {}
 
   register(registerData: RegisterData) {
@@ -30,7 +40,22 @@ export class AuthService {
       .pipe(map((response) => response.exists));
   }
 
-  login() {}
+  login(loginData: LoginData) {
+    return this.http
+      .post<LoginApiResponse>(
+        'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/auth/login',
+        loginData
+      )
+      .pipe(
+        map((response) => response.authToken),
+        tap((token) => {
+          this.authToken = token;
+          this.authStatus$.next(true);
+        })
+      );
+  }
 
-  logout() {}
+  logout() {
+    this.authStatus$.next(false);
+  }
 }
