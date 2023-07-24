@@ -58,9 +58,9 @@ export class LoginComponent {
   private readonly unsubscribe$: Subject<void> = new Subject();
   errorMessage = '';
   loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['marko@mail.com', [Validators.required, Validators.email]],
     password: [
-      '',
+      'passw0rd',
       [Validators.required, Validators.minLength(5), Validators.pattern(/\d+/)],
     ],
   });

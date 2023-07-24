@@ -3,16 +3,21 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { AuthService, TOKEN_MANAGER } from './auth/auth.service';
+import { HttpClientModule } from '@angular/common/http';
+import { SharedModule } from './shared/shared.module';
+import { LocalStorageTokenManager } from './auth/token-manager.service';
 
 @NgModule({
-  declarations: [
-    AppComponent
+  declarations: [AppComponent],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, SharedModule],
+  providers: [
+    AuthService,
+    {
+      provide: TOKEN_MANAGER,
+      useClass: LocalStorageTokenManager,
+    },
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
