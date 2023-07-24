@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, InjectionToken } from '@angular/core';
-import { BehaviorSubject, map, tap } from 'rxjs';
+import { BehaviorSubject, Subscription, map, tap } from 'rxjs';
 import { LocalStorageTokenManager } from './token-manager.service';
 import { TokenManager } from './token-manager';
 
@@ -23,13 +23,14 @@ export const TOKEN_MANAGER = new InjectionToken(
 
 @Injectable()
 export class AuthService {
+  subscription?: Subscription;
   authStatus$ = new BehaviorSubject(false);
 
   constructor(
     private http: HttpClient,
     @Inject(TOKEN_MANAGER) private tokenManager: TokenManager
   ) {
-    this.tokenManager.loadToken().subscribe((token) => {
+    this.subscription = this.tokenManager.loadToken().subscribe((token) => {
       if (token) {
         this.authStatus$.next(true);
       }
@@ -76,5 +77,9 @@ export class AuthService {
   logout() {
     this.authStatus$.next(false);
     this.tokenManager.removeToken();
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 }
