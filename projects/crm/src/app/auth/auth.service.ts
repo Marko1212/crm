@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, InjectionToken } from '@angular/core';
 import { BehaviorSubject, Subscription, map, tap } from 'rxjs';
-import { LocalStorageTokenManager } from './token-manager.service';
 import { TokenManager } from './token-manager';
 
 export type RegisterData = {
