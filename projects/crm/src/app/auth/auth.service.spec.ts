@@ -6,6 +6,9 @@ import {
 import { AuthService, TOKEN_MANAGER } from './auth.service';
 import { TokenManager } from './token-manager';
 import { Observable, catchError, combineLatest, of, skip } from 'rxjs';
+import { environment } from '../../environments/environment.development';
+
+const API_URL = environment.apiUrl;
 
 let storedToken: string | null = null;
 
@@ -87,10 +90,7 @@ describe('AuthService', () => {
       done();
     });
 
-    const req = spectator.expectOne(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/auth/login',
-      HttpMethod.POST
-    );
+    const req = spectator.expectOne(API_URL + '/auth/login', HttpMethod.POST);
 
     req.flush({
       authToken: 'MOCK_TOKEN',
@@ -122,10 +122,7 @@ describe('AuthService', () => {
       }, */
     );
 
-    const req = spectator.expectOne(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/auth/login',
-      HttpMethod.POST
-    );
+    const req = spectator.expectOne(API_URL + '/auth/login', HttpMethod.POST);
 
     req.flush(
       {
@@ -149,10 +146,7 @@ describe('AuthService', () => {
       })
       .subscribe(() => done());
 
-    const req = spectator.expectOne(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/auth/signup',
-      HttpMethod.POST
-    );
+    const req = spectator.expectOne(API_URL + '/auth/signup', HttpMethod.POST);
 
     expect(req.request.body).toEqual({
       email: 'mock@mail.com',
@@ -172,7 +166,7 @@ describe('AuthService', () => {
     });
 
     const req = spectator.expectOne(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/user/validation/exists',
+      API_URL + '/user/validation/exists',
       HttpMethod.POST
     );
 
