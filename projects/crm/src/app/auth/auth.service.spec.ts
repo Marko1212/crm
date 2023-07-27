@@ -137,4 +137,51 @@ describe('AuthService', () => {
       }
     );
   });
+
+  it('should register new account', (done: DoneFn) => {
+    spectator = createSpectator();
+
+    spectator.service
+      .register({
+        email: 'mock@mail.com',
+        password: 'passw0rd',
+        name: 'MOCK_NAME',
+      })
+      .subscribe(() => done());
+
+    const req = spectator.expectOne(
+      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/auth/signup',
+      HttpMethod.POST
+    );
+
+    expect(req.request.body).toEqual({
+      email: 'mock@mail.com',
+      password: 'passw0rd',
+      name: 'MOCK_NAME',
+    });
+
+    req.flush({});
+  });
+
+  it('should verify if a mail already exists', (done: DoneFn) => {
+    spectator = createSpectator();
+
+    spectator.service.exists('mock@mail.com').subscribe((exists) => {
+      expect(exists).toBeTrue();
+      done();
+    });
+
+    const req = spectator.expectOne(
+      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/user/validation/exists',
+      HttpMethod.POST
+    );
+
+    expect(req.request.body).toEqual({
+      email: 'mock@mail.com',
+    });
+
+    req.flush({
+      exists: true,
+    });
+  });
 });
