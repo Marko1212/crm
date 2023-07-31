@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { InvoiceFormType } from './invoice-form-type';
 
 @Component({
   selector: 'app-invoice-form-general',
@@ -53,19 +54,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
   styles: [],
 })
 export class InvoiceFormGeneralComponent {
-  @Input()
-  parent?: FormGroup<{
-    customer_name: FormControl;
-    description: FormControl;
-    status: FormControl;
-    details: FormArray<
-      FormGroup<{
-        quantity: FormControl;
-        amount: FormControl;
-        description: FormControl;
-      }>
-    >;
-  }>;
+  @Input() parent?: InvoiceFormType;
 
   get customerName() {
     return this.parent?.controls.customer_name;

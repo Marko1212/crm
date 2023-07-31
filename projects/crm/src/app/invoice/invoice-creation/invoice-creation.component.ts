@@ -10,9 +10,13 @@ import { Component } from '@angular/core';
         votre liste plus tard !
       </p>
 
-      <app-invoice-form></app-invoice-form>
+      <app-invoice-form (invoice-submit)="onSubmit($event)"></app-invoice-form>
     </div>
   `,
   styles: [],
 })
-export class InvoiceCreationComponent {}
+export class InvoiceCreationComponent {
+  onSubmit(invoiceData: any) {
+    console.log(invoiceData);
+  }
+}
