@@ -9,6 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { InvoiceFormType } from './invoice-form-type';
+import { Invoice } from '../invoice';
 
 @Component({
   selector: 'app-invoice-form',
@@ -39,7 +40,7 @@ import { InvoiceFormType } from './invoice-form-type';
   styles: [],
 })
 export class InvoiceFormComponent {
-  @Output('invoice-submit') invoiceSubmitEvent = new EventEmitter<any>();
+  @Output('invoice-submit') invoiceSubmitEvent = new EventEmitter<Invoice>();
 
   invoiceForm: InvoiceFormType = this.fb.group(
     {
@@ -89,7 +90,7 @@ export class InvoiceFormComponent {
     if (this.invoiceForm.invalid) {
       return;
     }
-    this.invoiceSubmitEvent.emit(this.invoiceForm.value);
+    this.invoiceSubmitEvent.emit(this.invoiceForm.value as Invoice);
   }
 }
 

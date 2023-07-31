@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Invoice } from '../invoice';
 
 @Component({
   selector: 'app-invoice-creation',
@@ -16,7 +17,7 @@ import { Component } from '@angular/core';
   styles: [],
 })
 export class InvoiceCreationComponent {
-  onSubmit(invoiceData: any) {
+  onSubmit(invoiceData: Invoice) {
     console.log(invoiceData);
   }
 }
