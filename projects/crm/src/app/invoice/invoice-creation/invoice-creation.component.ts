@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Invoice } from '../invoice';
 import { InvoiceService } from '../invoice.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-invoice-creation',
@@ -12,17 +13,29 @@ import { InvoiceService } from '../invoice.service';
         votre liste plus tard !
       </p>
 
+      <p class="alert bg-warning text-white" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </p>
+
       <app-invoice-form (invoice-submit)="onSubmit($event)"></app-invoice-form>
     </div>
   `,
   styles: [],
 })
 export class InvoiceCreationComponent {
-  constructor(private service: InvoiceService) {}
+  errorMessage = '';
+
+  constructor(
+    private service: InvoiceService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
   onSubmit(invoiceData: Invoice) {
     this.service.create(invoiceData).subscribe({
-      next: () => console.log('Ca marche'),
-      error: (error) => console.log(error),
+      next: () => this.router.navigate(['../'], { relativeTo: this.route }),
+      error: (error) =>
+        (this.errorMessage =
+          'Une erreur est survenue, merci de réessayer plus tard'),
     });
   }
 }

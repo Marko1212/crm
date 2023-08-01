@@ -12,7 +12,8 @@ import { InvoiceFormGeneralComponent } from './invoice-form/invoice-form-general
 import { InvoiceFormDetailsComponent } from './invoice-form/invoice-form-details.component';
 import { InvoiceFormTotalsComponent } from './invoice-form/invoice-form-totals.component';
 import { InvoiceService } from './invoice.service';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { AuthInterceptor } from './auth.interceptor';
 
 registerLocaleData(localeFr);
 
@@ -38,6 +39,14 @@ const routes: Routes = [
     ReactiveFormsModule,
     HttpClientModule,
   ],
-  providers: [InvoiceService],
+  providers: [
+    InvoiceService,
+    AuthInterceptor,
+    {
+      provide: HTTP_INTERCEPTORS,
+      multi: true,
+      useClass: AuthInterceptor,
+    },
+  ],
 })
 export class InvoiceModule {}

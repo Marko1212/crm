@@ -12,20 +12,7 @@ export class InvoiceService {
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   create(invoiceData: Invoice) {
-    return this.auth.authToken.pipe(
-      tap((token) => {
-        if (!token) {
-          throw new Error('Unauthenticated');
-        }
-      }),
-      switchMap((token) => {
-        return this.http.post<Invoice>(API_URL + '/invoice', invoiceData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      })
-    );
+    return this.http.post<Invoice>(API_URL + '/invoice', invoiceData);
   }
 
   update(invoiceData: Invoice) {
