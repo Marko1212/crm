@@ -44,8 +44,14 @@ export class InvoiceFormComponent {
 
   invoiceForm: InvoiceFormType = this.fb.group(
     {
-      customer_name: ['', [Validators.required, Validators.minLength(5)]],
-      description: ['', [Validators.required, Validators.minLength(5)]],
+      customer_name: [
+        'Marko Askovic',
+        [Validators.required, Validators.minLength(5)],
+      ],
+      description: [
+        'Création du site web',
+        [Validators.required, Validators.minLength(5)],
+      ],
       status: ['SENT'],
       details: this.fb.array<
         FormGroup<{
@@ -53,7 +59,13 @@ export class InvoiceFormComponent {
           amount: FormControl;
           quantity: FormControl;
         }>
-      >([]),
+      >([
+        this.fb.group({
+          amount: [300],
+          description: ['Journées de travail'],
+          quantity: [3],
+        }),
+      ]),
     },
     {
       validators: detailsExistsValidator,

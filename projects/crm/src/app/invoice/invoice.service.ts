@@ -1,41 +1,49 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Invoice } from './invoice';
+import { AuthService } from '../auth/auth.service';
+import { switchMap, tap } from 'rxjs';
+import { environment } from '../../environments/environment.development';
+
+const API_URL = environment.apiUrl;
 
 @Injectable()
 export class InvoiceService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
   create(invoiceData: Invoice) {
-    return this.http.post<Invoice>(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/invoice',
-      invoiceData
+    return this.auth.authToken.pipe(
+      tap((token) => {
+        if (!token) {
+          throw new Error('Unauthenticated');
+        }
+      }),
+      switchMap((token) => {
+        return this.http.post<Invoice>(API_URL + '/invoice', invoiceData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      })
     );
   }
 
   update(invoiceData: Invoice) {
     return this.http.put<Invoice>(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/invoice/' +
-        invoiceData.id,
+      API_URL + '/invoice/' + invoiceData.id,
       invoiceData
     );
   }
 
   findAll() {
-    return this.http.get<Invoice[]>(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/invoice/
-    );
+    return this.http.get<Invoice[]>(API_URL + '/invoice');
   }
 
   find(id: number) {
-    return this.http.get<Invoice>(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/invoice/' + id
-    );
+    return this.http.get<Invoice>(API_URL + '/invoice/' + id);
   }
 
   delete(id: number) {
-    return this.http.delete(
-      'https://x8ki-letl-twmt.n7.xano.io/api:cLAOENeS/invoice/' + id
-    );
+    return this.http.delete(API_URL + '/invoice/' + id);
   }
 }

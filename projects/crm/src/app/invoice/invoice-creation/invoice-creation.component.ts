@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Invoice } from '../invoice';
+import { InvoiceService } from '../invoice.service';
 
 @Component({
   selector: 'app-invoice-creation',
@@ -17,7 +18,11 @@ import { Invoice } from '../invoice';
   styles: [],
 })
 export class InvoiceCreationComponent {
+  constructor(private service: InvoiceService) {}
   onSubmit(invoiceData: Invoice) {
-    console.log(invoiceData);
+    this.service.create(invoiceData).subscribe({
+      next: () => console.log('Ca marche'),
+      error: (error) => console.log(error),
+    });
   }
 }

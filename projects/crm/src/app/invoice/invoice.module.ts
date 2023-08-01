@@ -11,6 +11,8 @@ import { InvoiceFormComponent } from './invoice-form/invoice-form.component';
 import { InvoiceFormGeneralComponent } from './invoice-form/invoice-form-general.component';
 import { InvoiceFormDetailsComponent } from './invoice-form/invoice-form-details.component';
 import { InvoiceFormTotalsComponent } from './invoice-form/invoice-form-totals.component';
+import { InvoiceService } from './invoice.service';
+import { HttpClientModule } from '@angular/common/http';
 
 registerLocaleData(localeFr);
 
@@ -30,6 +32,12 @@ const routes: Routes = [
     InvoiceFormDetailsComponent,
     InvoiceFormTotalsComponent,
   ],
-  imports: [CommonModule, RouterModule.forChild(routes), ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterModule.forChild(routes),
+    ReactiveFormsModule,
+    HttpClientModule,
+  ],
+  providers: [InvoiceService],
 })
 export class InvoiceModule {}
