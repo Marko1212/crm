@@ -1,4 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Inject, InjectionToken, Input } from '@angular/core';
+
+export const TAXE_RATE_TOKEN = new InjectionToken('Le taux de TVA applicable', {
+  providedIn: 'root',
+  factory() {
+    return 0.2;
+  },
+});
 
 @Component({
   selector: 'app-invoice-form-totals',
@@ -28,8 +35,10 @@ import { Component, Input } from '@angular/core';
 export class InvoiceFormTotalsComponent {
   @Input() total = 0;
 
+  constructor(@Inject(TAXE_RATE_TOKEN) private taxRate: number) {}
+
   get totalTVA() {
-    return this.total * 0.2;
+    return this.total * this.taxRate;
   }
 
   get totalTTC() {
