@@ -10,6 +10,7 @@ import { InvoiceFormType } from './invoice-form-type';
         <p>Vous devez ajouter des détails à votre facture</p>
         <button
           type="button"
+          id="initial-add-button"
           class="btn btn-sm btn-outline-light"
           (click)="detailsAddedEvent.emit()"
         >
@@ -73,6 +74,7 @@ import { InvoiceFormType } from './invoice-form-type';
             <div class="col-1">
               <button
                 type="button"
+                id="remove-button-{{ i }}"
                 class="btn w-auto d-block btn-sm btn-danger"
                 (click)="detailsRemovedEvent.emit(i)"
               >
@@ -84,6 +86,7 @@ import { InvoiceFormType } from './invoice-form-type';
         <button
           *ngIf="details.length > 0"
           class="btn btn-primary btn-sm"
+          id="add-button"
           type="button"
           (click)="detailsAddedEvent.emit()"
         >
