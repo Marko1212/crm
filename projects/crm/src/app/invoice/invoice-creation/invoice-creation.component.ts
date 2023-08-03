@@ -33,7 +33,7 @@ export class InvoiceCreationComponent {
   onSubmit(invoiceData: Invoice) {
     this.service.create(invoiceData).subscribe({
       next: () => this.router.navigate(['../'], { relativeTo: this.route }),
-      error: (error) =>
+      error: () =>
         (this.errorMessage =
           'Une erreur est survenue, merci de réessayer plus tard'),
     });
