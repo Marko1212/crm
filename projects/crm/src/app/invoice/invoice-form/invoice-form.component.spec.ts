@@ -11,9 +11,12 @@ import { InvoiceFormGeneralComponent } from './invoice-form-general.component';
 import { InvoiceFormTotalsComponent } from './invoice-form-totals.component';
 import { Invoice } from '../invoice';
 import { Component } from '@angular/core';
+import { InvoiceFormType } from './invoice-form-type';
 
 describe('InvoiceFormComponent', () => {
   let spectator: Spectator<InvoiceFormComponent>;
+  let component: InvoiceFormComponent;
+  let form: InvoiceFormType;
 
   const createSpectator = createComponentFactory({
     component: InvoiceFormComponent,
@@ -25,10 +28,14 @@ describe('InvoiceFormComponent', () => {
     ],
   });
 
-  it('should validate customer_name', () => {
+  beforeEach(() => {
     spectator = createSpectator();
+    component = spectator.component;
+    form = component.invoiceForm;
+  });
 
-    const field = spectator.component.invoiceForm.controls.customer_name;
+  it('should validate customer_name', () => {
+    const field = form.controls.customer_name;
 
     spectator.typeInElement('', '#customer_name');
     expect(field.hasError('required')).toBeTrue();
@@ -41,9 +48,7 @@ describe('InvoiceFormComponent', () => {
   });
 
   it('should validate description', () => {
-    spectator = createSpectator();
-
-    const field = spectator.component.invoiceForm.controls.description;
+    const field = form.controls.description;
 
     spectator.typeInElement('', '#description');
     expect(field.hasError('required')).toBeTrue();
@@ -56,21 +61,17 @@ describe('InvoiceFormComponent', () => {
   });
 
   it('should validate that at least one detail item is given', () => {
-    spectator = createSpectator();
+    expect(form.hasError('noDetails')).toBeTrue();
 
-    expect(spectator.component.invoiceForm.hasError('noDetails')).toBeTrue();
+    component.onAddDetails();
 
-    spectator.component.onAddDetails();
-
-    expect(spectator.component.invoiceForm.hasError('noDetails')).toBeFalse();
+    expect(form.hasError('noDetails')).toBeFalse();
   });
 
   it('should validate details', () => {
-    spectator = createSpectator();
+    component.onAddDetails();
 
-    spectator.component.onAddDetails();
-
-    const detailItem = spectator.component.invoiceForm.controls.details.at(0);
+    const detailItem = form.controls.details.at(0);
 
     // Description
     spectator.typeInElement('', '#description_0');
@@ -97,37 +98,31 @@ describe('InvoiceFormComponent', () => {
   });
 
   it('should add a detail item when we call addDetails()', () => {
-    spectator = createSpectator();
-
-    spectator.component.onAddDetails();
+    component.onAddDetails();
     spectator.detectChanges();
     expect(spectator.queryAll('.detail-row')).toHaveLength(1);
 
-    spectator.component.onAddDetails();
+    component.onAddDetails();
     spectator.detectChanges();
     expect(spectator.queryAll('.detail-row')).toHaveLength(2);
   });
 
   it('should remove a detail item when we call removeDetail()', () => {
-    spectator = createSpectator();
-
-    spectator.component.onAddDetails(); // item 0
-    spectator.component.onAddDetails(); // item 1
+    component.onAddDetails(); // item 0
+    component.onAddDetails(); // item 1
     spectator.detectChanges();
     expect(spectator.queryAll('.detail-row')).toHaveLength(2);
 
-    spectator.component.onRemoveDetails(0);
+    component.onRemoveDetails(0);
     spectator.detectChanges();
     expect(spectator.queryAll('.detail-row')).toHaveLength(1);
 
-    spectator.component.onRemoveDetails(0);
+    component.onRemoveDetails(0);
     spectator.detectChanges();
     expect(spectator.queryAll('.detail-row')).toHaveLength(0);
   });
 
   it('should listen to details events', () => {
-    spectator = createSpectator();
-
     spectator.click('#initial-add-button');
 
     expect(spectator.queryAll('.detail-row')).toHaveLength(1);
@@ -137,16 +132,14 @@ describe('InvoiceFormComponent', () => {
   });
 
   it('should calculate total', () => {
-    spectator = createSpectator();
-
-    spectator.component.details.push(
+    component.details.push(
       new FormGroup({
         amount: new FormControl(200),
         quantity: new FormControl(3),
         description: new FormControl(),
       })
     );
-    spectator.component.details.push(
+    component.details.push(
       new FormGroup({
         amount: new FormControl(300),
         quantity: new FormControl(3),
@@ -154,7 +147,7 @@ describe('InvoiceFormComponent', () => {
       })
     );
 
-    expect(spectator.component.total).toBe(1500);
+    expect(component.total).toBe(1500);
   });
 });
 
@@ -166,6 +159,10 @@ class TestHostComponent {
 }
 describe('InvoiceFormComponent with Host', () => {
   let spectator: SpectatorHost<InvoiceFormComponent, TestHostComponent>;
+  let component: InvoiceFormComponent;
+  let form: InvoiceFormType;
+  let host: TestHostComponent;
+  let submitSpy: jasmine.Spy;
 
   const createHost = createHostFactory({
     component: InvoiceFormComponent,
@@ -179,14 +176,18 @@ describe('InvoiceFormComponent with Host', () => {
     imports: [ReactiveFormsModule],
   });
 
-  it('should emit an event on (invoice-submit) if form is valid and user clicks submit button', () => {
+  beforeEach(() => {
     spectator = createHost();
+    component = spectator.component;
+    host = spectator.hostComponent;
+    form = component.invoiceForm;
+    submitSpy = spyOn(spectator.hostComponent, 'onSubmit');
+  });
 
-    const submitSpy = spyOn(spectator.hostComponent, 'onSubmit');
-
+  it('should emit an event on (invoice-submit) if form is valid and user clicks submit button', () => {
     spectator.click('#initial-add-button');
 
-    spectator.component.invoiceForm.setValue({
+    form.setValue({
       description: 'MOCK_DESCRIPTION',
       customer_name: 'MOCK_CUSTOMER',
       status: 'PAID',
@@ -202,16 +203,10 @@ describe('InvoiceFormComponent with Host', () => {
     spectator.detectChanges();
     spectator.click('#submit');
 
-    expect(submitSpy).toHaveBeenCalledWith(
-      spectator.component.invoiceForm.value as Invoice
-    );
+    expect(submitSpy).toHaveBeenCalledWith(form.value as Invoice);
   });
 
   it('should not emit an event on (invoice-submit) if form is invalid and user clicks submit button', () => {
-    spectator = createHost();
-
-    const submitSpy = spyOn(spectator.hostComponent, 'onSubmit');
-
     spectator.click('#submit');
 
     expect(submitSpy).not.toHaveBeenCalled();
