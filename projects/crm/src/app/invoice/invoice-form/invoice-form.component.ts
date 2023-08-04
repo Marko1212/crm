@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -42,6 +42,9 @@ import { Invoice } from '../invoice';
 export class InvoiceFormComponent {
   @Output('invoice-submit') invoiceSubmitEvent = new EventEmitter<Invoice>();
 
+  @Input()
+  invoice?: Invoice;
+
   invoiceForm: InvoiceFormType = this.fb.group(
     {
       customer_name: ['', [Validators.required, Validators.minLength(5)]],
@@ -61,6 +64,18 @@ export class InvoiceFormComponent {
   );
 
   constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    if (!this.invoice) {
+      return;
+    }
+
+    this.invoice.details.forEach((item) => {
+      this.onAddDetails();
+    });
+
+    this.invoiceForm.patchValue(this.invoice);
+  }
 
   get details() {
     return this.invoiceForm.controls.details;

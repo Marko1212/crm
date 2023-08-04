@@ -27,7 +27,7 @@ import { Component } from '@angular/core';
               <span class="badge bg-success"> Payée </span>
             </td>
             <td>
-              <a routerLink="/invoices/1" class="btn btn-sm btn-primary">
+              <a routerLink="/invoices/3" class="btn btn-sm btn-primary">
                 Modifier
               </a>
               <button class="btn btn-sm ms-1 btn-danger">Supprimer</button>
