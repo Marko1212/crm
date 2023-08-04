@@ -10,6 +10,8 @@ export type InvoiceDetails = InvoiceDetail[];
 
 export type Invoice = {
   id?: number;
+  created_at?: number;
+  total?: number;
   customer_name: string;
   description: string;
   status: InvoiceStatus;

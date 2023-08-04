@@ -14,6 +14,7 @@ import { InvoiceFormTotalsComponent } from './invoice-form/invoice-form-totals.c
 import { InvoiceService } from './invoice.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
+import { InvoiceStatusComponent } from './invoices-list/invoice-status.component';
 
 registerLocaleData(localeFr);
 
@@ -32,6 +33,7 @@ const routes: Routes = [
     InvoiceFormGeneralComponent,
     InvoiceFormDetailsComponent,
     InvoiceFormTotalsComponent,
+    InvoiceStatusComponent,
   ],
   imports: [
     CommonModule,

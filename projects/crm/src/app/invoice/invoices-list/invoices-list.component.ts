@@ -1,10 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { InvoiceService } from '../invoice.service';
+import { Invoice } from '../invoice';
 
 @Component({
   selector: 'app-invoices-list',
   template: `
     <div class="bg-light p-3 rounded">
       <h1>Liste de vos factures</h1>
+      <div class="alert bg-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
       <hr />
       <table class="table table-hover">
         <thead>
@@ -18,19 +23,33 @@ import { Component } from '@angular/core';
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Refonte du site web du restaurant</td>
-            <td>22/01/2022</td>
-            <td class="text-center">1 200,00 €</td>
+          <tr *ngFor="let invoice of invoices">
+            <td>{{ invoice.id }}</td>
+            <td>{{ invoice.description }}</td>
+            <td>{{ invoice.created_at | date : 'dd/MM/yyyy' }}</td>
             <td class="text-center">
-              <span class="badge bg-success"> Payée </span>
+              {{
+                invoice.total | currency : 'EUR' : 'symbol' : undefined : 'fr'
+              }}
+            </td>
+            <td class="text-center">
+              <app-invoice-status
+                [status]="invoice.status"
+              ></app-invoice-status>
             </td>
             <td>
-              <a routerLink="/invoices/3" class="btn btn-sm btn-primary">
+              <a
+                routerLink="/invoices/{{ invoice.id }}"
+                class="btn btn-sm btn-primary"
+              >
                 Modifier
               </a>
-              <button class="btn btn-sm ms-1 btn-danger">Supprimer</button>
+              <button
+                (click)="onDelete(invoice.id!)"
+                class="btn btn-sm ms-1 btn-danger"
+              >
+                Supprimer
+              </button>
             </td>
           </tr>
         </tbody>
@@ -39,4 +58,28 @@ import { Component } from '@angular/core';
   `,
   styles: [],
 })
-export class InvoicesListComponent {}
+export class InvoicesListComponent implements OnInit {
+  invoices: Invoice[] = [];
+  errorMessage = '';
+
+  constructor(private service: InvoiceService) {}
+
+  ngOnInit(): void {
+    this.service.findAll().subscribe((invoices) => (this.invoices = invoices));
+  }
+
+  onDelete(id: number) {
+    const oldInvoices = [...this.invoices];
+
+    this.invoices = this.invoices.filter((item) => item.id !== id);
+
+    this.service.delete(id).subscribe({
+      error: (error) => {
+        console.log(error);
+        this.errorMessage =
+          'Il y a eu un problème lors de la suppression de la facture';
+        this.invoices = oldInvoices;
+      },
+    });
+  }
+}
