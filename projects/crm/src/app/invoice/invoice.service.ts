@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Invoice } from './invoice';
-import { AuthService } from '../auth/auth.service';
-import { map, switchMap, tap } from 'rxjs';
+import { map } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 
 const API_URL = environment.apiUrl;
