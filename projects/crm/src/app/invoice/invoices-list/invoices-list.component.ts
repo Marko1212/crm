@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { InvoiceService } from '../invoice.service';
 import { Invoice } from '../invoice';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-invoices-list',
@@ -38,10 +39,7 @@ import { Invoice } from '../invoice';
               ></app-invoice-status>
             </td>
             <td>
-              <a
-                routerLink="/invoices/{{ invoice.id }}"
-                class="btn btn-sm btn-primary"
-              >
+              <a [routerLink]="[invoice.id]" class="btn btn-sm btn-primary">
                 Modifier
               </a>
               <button
@@ -62,10 +60,15 @@ export class InvoicesListComponent implements OnInit {
   invoices: Invoice[] = [];
   errorMessage = '';
 
+  deleteSub?: Subscription;
+  findAllSub?: Subscription;
+
   constructor(private service: InvoiceService) {}
 
   ngOnInit(): void {
-    this.service.findAll().subscribe((invoices) => (this.invoices = invoices));
+    this.findAllSub = this.service
+      .findAll()
+      .subscribe((invoices) => (this.invoices = invoices));
   }
 
   onDelete(id: number) {
@@ -73,7 +76,7 @@ export class InvoicesListComponent implements OnInit {
 
     this.invoices = this.invoices.filter((item) => item.id !== id);
 
-    this.service.delete(id).subscribe({
+    this.deleteSub = this.service.delete(id).subscribe({
       error: (error) => {
         console.log(error);
         this.errorMessage =
@@ -81,5 +84,10 @@ export class InvoicesListComponent implements OnInit {
         this.invoices = oldInvoices;
       },
     });
+  }
+
+  ngOnDestroy() {
+    this.findAllSub?.unsubscribe();
+    this.deleteSub?.unsubscribe();
   }
 }
