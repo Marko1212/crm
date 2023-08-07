@@ -155,9 +155,51 @@ describe('InvoiceFormComponent', () => {
   template: ``,
 })
 class TestHostComponent {
+  invoice: Invoice = {
+    id: 42,
+    description: 'MOCK_DESCRIPTION',
+    customer_name: 'MOCK_CUSTOMER',
+    status: 'PAID',
+    details: [
+      { description: 'MOCK-DETAIL_1', amount: 300, quantity: 3 },
+      { description: 'MOCK-DETAIL_2', amount: 500, quantity: 3 },
+    ],
+  };
   onSubmit(invoice: Invoice) {}
 }
-describe('InvoiceFormComponent with Host', () => {
+
+describe('InvoiceFormComponent with Input', () => {
+  let spectator: SpectatorHost<InvoiceFormComponent, TestHostComponent>;
+  const createHost = createHostFactory({
+    component: InvoiceFormComponent,
+    host: TestHostComponent,
+    template: `<app-invoice-form [invoice]="invoice"></app-invoice-form>`,
+    declarations: [
+      InvoiceFormDetailsComponent,
+      InvoiceFormTotalsComponent,
+      InvoiceFormGeneralComponent,
+    ],
+    imports: [ReactiveFormsModule],
+  });
+
+  it('should fill the form with @Input invoice', () => {
+    spectator = createHost();
+
+    expect(spectator.component.invoiceForm.value).toEqual({
+      description: 'MOCK_DESCRIPTION',
+      customer_name: 'MOCK_CUSTOMER',
+      status: 'PAID',
+      details: [
+        { description: 'MOCK-DETAIL_1', amount: 300, quantity: 3 },
+        { description: 'MOCK-DETAIL_2', amount: 500, quantity: 3 },
+      ],
+    });
+
+    expect(spectator.queryAll('.detail-row')).toHaveLength(2);
+  });
+});
+
+describe('InvoiceFormComponent with Output', () => {
   let spectator: SpectatorHost<InvoiceFormComponent, TestHostComponent>;
   let component: InvoiceFormComponent;
   let form: InvoiceFormType;
