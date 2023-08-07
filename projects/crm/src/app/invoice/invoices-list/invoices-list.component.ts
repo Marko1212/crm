@@ -43,6 +43,7 @@ import { Subscription } from 'rxjs';
                 Modifier
               </a>
               <button
+                id="delete-button-{{ invoice.id }}"
                 (click)="onDelete(invoice.id!)"
                 class="btn btn-sm ms-1 btn-danger"
               >
@@ -66,9 +67,12 @@ export class InvoicesListComponent implements OnInit {
   constructor(private service: InvoiceService) {}
 
   ngOnInit(): void {
-    this.findAllSub = this.service
-      .findAll()
-      .subscribe((invoices) => (this.invoices = invoices));
+    this.findAllSub = this.service.findAll().subscribe({
+      next: (invoices) => (this.invoices = invoices),
+      error: () =>
+        (this.errorMessage =
+          "Nous n'avons pas réussi à récupérer vos factures"),
+    });
   }
 
   onDelete(id: number) {

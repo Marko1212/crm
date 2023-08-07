@@ -1,0 +1,143 @@
+import { Spectator, createComponentFactory } from '@ngneat/spectator';
+import { InvoicesListComponent } from './invoices-list.component';
+import { InvoiceStatusComponent } from './invoice-status.component';
+import { RouterModule } from '@angular/router';
+import { InvoiceService } from '../invoice.service';
+import { of, throwError } from 'rxjs';
+import { Invoice } from '../invoice';
+
+describe('InvoicesListComponent', () => {
+  let spectator: Spectator<InvoicesListComponent>;
+
+  const createSpectator = createComponentFactory({
+    component: InvoicesListComponent,
+    declarations: [InvoiceStatusComponent],
+    imports: [RouterModule.forRoot([])],
+    mocks: [InvoiceService],
+  });
+
+  it('should display an error message if request fails', () => {
+    spectator = createSpectator({
+      detectChanges: false,
+    });
+
+    spectator
+      .inject(InvoiceService)
+      .findAll.and.returnValue(throwError(() => of(null)));
+
+    spectator.detectChanges();
+
+    expect(spectator.query('.alert.bg-danger')).toExist();
+  });
+
+  it('should display a list of invoices if request succeeds', () => {
+    spectator = createSpectator({
+      detectChanges: false,
+    });
+
+    const mockInvoices: Invoice[] = [
+      {
+        id: 1,
+        description: 'MOCK_DESCRIPTION',
+        total: 300,
+        status: 'PAID',
+        created_at: Date.now(),
+        customer_name: 'MOCK_CUSTOMER',
+        details: [],
+      },
+      {
+        id: 2,
+        description: 'MOCK_DESCRIPTION',
+        total: 500,
+        status: 'CANCELED',
+        created_at: Date.now(),
+        customer_name: 'MOCK_CUSTOMER',
+        details: [],
+      },
+    ];
+
+    spectator.inject(InvoiceService).findAll.and.returnValue(of(mockInvoices));
+
+    spectator.detectChanges();
+
+    expect(spectator.queryAll('tbody tr')).toHaveLength(2);
+    expect(spectator.query('tbody tr')?.innerHTML).toContain('300,00&nbsp;€');
+  });
+
+  it('should delete an invoice if request succeeds', () => {
+    spectator = createSpectator({
+      detectChanges: false,
+    });
+
+    const mockInvoices: Invoice[] = [
+      {
+        id: 1,
+        description: 'MOCK_DESCRIPTION',
+        total: 300,
+        status: 'PAID',
+        created_at: Date.now(),
+        customer_name: 'MOCK_CUSTOMER',
+        details: [],
+      },
+      {
+        id: 2,
+        description: 'MOCK_DESCRIPTION',
+        total: 500,
+        status: 'CANCELED',
+        created_at: Date.now(),
+        customer_name: 'MOCK_CUSTOMER',
+        details: [],
+      },
+    ];
+
+    spectator.inject(InvoiceService).findAll.and.returnValue(of(mockInvoices));
+
+    spectator.inject(InvoiceService).delete.and.returnValue(of(null));
+
+    spectator.detectChanges();
+
+    spectator.click('#delete-button-1');
+
+    expect(spectator.query('#delete-button-1')).not.toExist();
+  });
+
+  it('should not delete an invoice if request fails', () => {
+    spectator = createSpectator({
+      detectChanges: false,
+    });
+
+    const mockInvoices: Invoice[] = [
+      {
+        id: 1,
+        description: 'MOCK_DESCRIPTION',
+        total: 300,
+        status: 'PAID',
+        created_at: Date.now(),
+        customer_name: 'MOCK_CUSTOMER',
+        details: [],
+      },
+      {
+        id: 2,
+        description: 'MOCK_DESCRIPTION',
+        total: 500,
+        status: 'CANCELED',
+        created_at: Date.now(),
+        customer_name: 'MOCK_CUSTOMER',
+        details: [],
+      },
+    ];
+
+    spectator.inject(InvoiceService).findAll.and.returnValue(of(mockInvoices));
+
+    spectator
+      .inject(InvoiceService)
+      .delete.and.returnValue(throwError(() => of(null)));
+
+    spectator.detectChanges();
+
+    spectator.click('#delete-button-1');
+
+    expect(spectator.query('#delete-button-1')).toExist();
+    expect(spectator.query('.alert.bg-danger')).toExist();
+  });
+});
