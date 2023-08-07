@@ -16,11 +16,16 @@ describe('InvoicesListComponent', () => {
     mocks: [InvoiceService],
   });
 
-  it('should display an error message if request fails', () => {
+  beforeEach(() => {
     spectator = createSpectator({
       detectChanges: false,
     });
+    spectator
+      .inject(InvoiceService)
+      .findAll.and.returnValue(of(getFakeInvoices()));
+  });
 
+  it('should display an error message if request fails', () => {
     spectator
       .inject(InvoiceService)
       .findAll.and.returnValue(throwError(() => of(null)));
@@ -31,33 +36,6 @@ describe('InvoicesListComponent', () => {
   });
 
   it('should display a list of invoices if request succeeds', () => {
-    spectator = createSpectator({
-      detectChanges: false,
-    });
-
-    const mockInvoices: Invoice[] = [
-      {
-        id: 1,
-        description: 'MOCK_DESCRIPTION',
-        total: 300,
-        status: 'PAID',
-        created_at: Date.now(),
-        customer_name: 'MOCK_CUSTOMER',
-        details: [],
-      },
-      {
-        id: 2,
-        description: 'MOCK_DESCRIPTION',
-        total: 500,
-        status: 'CANCELED',
-        created_at: Date.now(),
-        customer_name: 'MOCK_CUSTOMER',
-        details: [],
-      },
-    ];
-
-    spectator.inject(InvoiceService).findAll.and.returnValue(of(mockInvoices));
-
     spectator.detectChanges();
 
     expect(spectator.queryAll('tbody tr')).toHaveLength(2);
@@ -65,33 +43,6 @@ describe('InvoicesListComponent', () => {
   });
 
   it('should delete an invoice if request succeeds', () => {
-    spectator = createSpectator({
-      detectChanges: false,
-    });
-
-    const mockInvoices: Invoice[] = [
-      {
-        id: 1,
-        description: 'MOCK_DESCRIPTION',
-        total: 300,
-        status: 'PAID',
-        created_at: Date.now(),
-        customer_name: 'MOCK_CUSTOMER',
-        details: [],
-      },
-      {
-        id: 2,
-        description: 'MOCK_DESCRIPTION',
-        total: 500,
-        status: 'CANCELED',
-        created_at: Date.now(),
-        customer_name: 'MOCK_CUSTOMER',
-        details: [],
-      },
-    ];
-
-    spectator.inject(InvoiceService).findAll.and.returnValue(of(mockInvoices));
-
     spectator.inject(InvoiceService).delete.and.returnValue(of(null));
 
     spectator.detectChanges();
@@ -102,33 +53,6 @@ describe('InvoicesListComponent', () => {
   });
 
   it('should not delete an invoice if request fails', () => {
-    spectator = createSpectator({
-      detectChanges: false,
-    });
-
-    const mockInvoices: Invoice[] = [
-      {
-        id: 1,
-        description: 'MOCK_DESCRIPTION',
-        total: 300,
-        status: 'PAID',
-        created_at: Date.now(),
-        customer_name: 'MOCK_CUSTOMER',
-        details: [],
-      },
-      {
-        id: 2,
-        description: 'MOCK_DESCRIPTION',
-        total: 500,
-        status: 'CANCELED',
-        created_at: Date.now(),
-        customer_name: 'MOCK_CUSTOMER',
-        details: [],
-      },
-    ];
-
-    spectator.inject(InvoiceService).findAll.and.returnValue(of(mockInvoices));
-
     spectator
       .inject(InvoiceService)
       .delete.and.returnValue(throwError(() => of(null)));
@@ -141,3 +65,26 @@ describe('InvoicesListComponent', () => {
     expect(spectator.query('.alert.bg-danger')).toExist();
   });
 });
+
+const getFakeInvoices = () => {
+  return [
+    {
+      id: 1,
+      description: 'MOCK_DESCRIPTION',
+      total: 300,
+      status: 'PAID',
+      created_at: Date.now(),
+      customer_name: 'MOCK_CUSTOMER',
+      details: [],
+    },
+    {
+      id: 2,
+      description: 'MOCK_DESCRIPTION',
+      total: 500,
+      status: 'CANCELED',
+      created_at: Date.now(),
+      customer_name: 'MOCK_CUSTOMER',
+      details: [],
+    },
+  ] as Invoice[];
+};

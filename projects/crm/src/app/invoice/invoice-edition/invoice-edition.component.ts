@@ -14,7 +14,7 @@ import { Observable, map, switchMap, tap } from 'rxjs';
         votre liste plus tard !
       </p>
 
-      <p class="alert bg-warning text-white" *ngIf="errorMessage">
+      <p class="alert bg-danger text-white" *ngIf="errorMessage">
         {{ errorMessage }}
       </p>
 
